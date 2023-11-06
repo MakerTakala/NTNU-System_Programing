@@ -61,6 +61,22 @@ class Section:
             print("\t", insruction)
         return ""
 
+    def _calcualte(self, operand: str, cur_location: int = 0) -> str:
+        if operand == "*":
+            operand = str(cur_location)
+            return operand
+        for symbol in self.__symbol_table:
+            if symbol in operand and self.__symbol_table[symbol] != None:
+                operand = operand.replace(symbol, str(self.__symbol_table[symbol]))
+        for symbol in self.__extdef_table:
+            if symbol in operand and self.__extdef_table[symbol] != None:
+                operand = operand.replace(symbol, str(self.__extdef_table[symbol]))
+        try:
+            result = eval(operand)
+            return result
+        except:
+            return None
+
     def sorting(self) -> None:
         defalut_block = ""
         blocks = {}
@@ -118,11 +134,18 @@ class Section:
                     self.instructions.insert(index, literal_instrcution)
                 literal_table = []
 
-    def set_symbol_location(self) -> None:
+    def set_symbol(self) -> None:
         for instruction in self.instructions:
             if instruction.symbol != "":
                 print(instruction.symbol)
                 self.__symbol_table[instruction.symbol] = None
+            if instruction.mnemonic == "EXTDEF":
+                for symbol in instruction.operand.split(","):
+                    self.__extdef_table[symbol] = 0
+            if instruction.mnemonic == "EXTREF":
+                for symbol in instruction.operand.split(","):
+                    self.__extref_table[symbol] = None
+
         while True:
             finished = True
             for symbol in self.__symbol_table:
@@ -137,6 +160,8 @@ class Section:
             for instruction in self.instructions:
                 if instruction.symbol != "":
                     self.__symbol_table[instruction.symbol] = cur_location
+                    if instruction.symbol in self.__extdef_table:
+                        self.__extdef_table[instruction.symbol] = cur_location
 
                 if instruction.mnemonic == "START" or instruction.mnemonic == "CSECT":
                     cur_location = int(instruction.operand)
@@ -157,45 +182,73 @@ class Section:
                     elif instruction.operand[0] == "X":
                         cur_location += (len(instruction.operand) - 3) // 2
                 elif instruction.mnemonic == "WORD":
-                    operand = instruction.operand
-                    if operand == "*":
-                        operand = str(cur_location)
-                        continue
-                    if eval(operand, self.__symbol_table):
-                        result = eval(operand, self.__symbol_table)
+                    result = self._calcualte(instruction.operand, cur_location)
+                    if result != None:
                         self.__symbol_table[instruction.symbol] = result
                     cur_location += 3
                 elif instruction.mnemonic == "EQU":
-                    operand = instruction.operand
-                    if operand == "*":
-                        operand = str(cur_location)
-                        continue
-                    if eval(operand, self.__symbol_table):
-                        result = eval(operand, self.__symbol_table)
+                    result = self._calcualte(instruction.operand, cur_location)
+                    if result != None:
                         self.__symbol_table[instruction.symbol] = result
                 elif instruction.mnemonic == "ORG":
-                    operand = instruction.operand
-                    if operand == "*":
-                        operand = str(cur_location)
-                        continue
-                    if eval(operand, self.__symbol_table):
-                        result = eval(operand, self.__symbol_table)
+                    result = self._calcualte(instruction.operand, cur_location)
+                    if result != None:
+                        instruction.operand = result
                         cur_location = int(result)
+                    else:
+                        raise Exception("ORG can't support forward reference")
                 elif instruction.mnemonic == "BASE":
-                    operand = instruction.operand
-                    if operand == "*":
-                        operand = str(cur_location)
-                        continue
-                    if eval(operand, self.__symbol_table):
-                        result = eval(operand, self.__symbol_table)
+                    result = self._calcualte(instruction.operand, cur_location)
+                    if result != None:
+                        instruction.operand = result
+
                 else:
                     cur_location += int(instruction.format)
-        del self.__symbol_table["__builtins__"]
+
+    def set_location(self) -> None:
+        cur_location = 0
+        for instruction in self.instructions:
+            instruction.location = cur_location
+            cur_location += int(instruction.format)
+            if instruction.mnemonic == "START" or instruction.mnemonic == "CSECT":
+                cur_location = int(instruction.operand)
+            elif instruction.mnemonic == "RESW":
+                cur_location += 3 * int(instruction.operand)
+            elif instruction.mnemonic == "RESB":
+                cur_location += int(instruction.operand)
+            elif instruction.mnemonic == "BYTE":
+                if instruction.operand[0] == "C":
+                    cur_location += len(instruction.operand) - 3
+                elif instruction.operand[0] == "X":
+                    cur_location += (len(instruction.operand) - 3) // 2
+            elif instruction.mnemonic == "WORD":
+                cur_location += 3
+            elif instruction.mnemonic == "ORG":
+                result = self._calcualte(instruction.operand)
+                cur_location = int(result)
+
+    def set_object_code(self) -> None:
+        base = 0
+        for instruction in self.instructions:
+            if instruction.mnemonic == "BYTE":
+                if instruction.operand[0] == "C":
+                    instruction.object_code = f"{instruction.operand[2:-1]}"
+                elif instruction.operand[0] == "X":
+                    instruction.object_code = f"{instruction.operand[2:-1]}"
+            elif instruction.mnemonic == "WORD":
+                instruction.object_code = f"{int(instruction.operand):06X}"
+            elif instruction.mnemonic == "BASE":
+                base = self._calcualte(instruction.operand)
+
+            elif instruction.mnemonic in opcode_table:
+                pass
 
     def assemble(self) -> None:
         self.sorting()
         self.slove_literal()
-        self.set_symbol_location()
+        self.set_symbol()
+        self.set_location()
+        self.set_object_code()
 
     def write(self, file) -> None:
         pass
