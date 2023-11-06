@@ -1,0 +1,297 @@
+{
+    "ADD": {
+        "obj": "18",
+        "format": 3,
+        "isSIC": true
+    },
+    "ADDF": {
+        "obj": "58",
+        "format": 3,
+        "isSIC": false
+    },
+    "ADDR": {
+        "obj": "90",
+        "format": 2,
+        "isSIC": false
+    },
+    "AND": {
+        "obj": "40",
+        "format": 3,
+        "isSIC": true
+    },
+    "CLEAR": {
+        "obj": "B4",
+        "format": 2,
+        "isSIC": false
+    },
+    "COMP": {
+        "obj": "28",
+        "format": 3,
+        "isSIC": true
+    },
+    "COMPF": {
+        "obj": "88",
+        "format": 3,
+        "isSIC": false
+    },
+    "COMPR": {
+        "obj": "A0",
+        "format": 2,
+        "isSIC": false
+    },
+    "DIV": {
+        "obj": "24",
+        "format": 3,
+        "isSIC": true
+    },
+    "DIVF": {
+        "obj": "64",
+        "format": 3,
+        "isSIC": false
+    },
+    "DIVR": {
+        "obj": "9C",
+        "format": 2,
+        "isSIC": false
+    },
+    "FIX": {
+        "obj": "C4",
+        "format": 1,
+        "isSIC": false
+    },
+    "FLOAT": {
+        "obj": "C0",
+        "format": 1,
+        "isSIC": false
+    },
+    "HIO": {
+        "obj": "F4",
+        "format": 1,
+        "isSIC": false
+    },
+    "J": {
+        "obj": "3C",
+        "format": 3,
+        "isSIC": true
+    },
+    "JEQ": {
+        "obj": "30",
+        "format": 3,
+        "isSIC": true
+    },
+    "JGT": {
+        "obj": "34",
+        "format": 3,
+        "isSIC": true
+    },
+    "JLT": {
+        "obj": "38",
+        "format": 3,
+        "isSIC": true
+    },
+    "JSUB": {
+        "obj": "48",
+        "format": 3,
+        "isSIC": true
+    },
+    "LDA": {
+        "obj": "00",
+        "format": 3,
+        "isSIC": true
+    },
+    "LDB": {
+        "obj": "68",
+        "format": 3,
+        "isSIC": false
+    },
+    "LDCH": {
+        "obj": "50",
+        "format": 3,
+        "isSIC": true
+    },
+    "LDF": {
+        "obj": "70",
+        "format": 3,
+        "isSIC": false
+    },
+    "LDL": {
+        "obj": "08",
+        "format": 3,
+        "isSIC": true
+    },
+    "LDS": {
+        "obj": "6C",
+        "format": 3,
+        "isSIC": false
+    },
+    "LDT": {
+        "obj": "74",
+        "format": 3,
+        "isSIC": false
+    },
+    "LDX": {
+        "obj": "04",
+        "format": 3,
+        "isSIC": true
+    },
+    "LPS": {
+        "obj": "D0",
+        "format": 3,
+        "isSIC": false
+    },
+    "MUL": {
+        "obj": "20",
+        "format": 3,
+        "isSIC": true
+    },
+    "MULF": {
+        "obj": "60",
+        "format": 3,
+        "isSIC": false
+    },
+    "MULR": {
+        "obj": "98",
+        "format": 2,
+        "isSIC": false
+    },
+    "NORM": {
+        "obj": "C8",
+        "format": 1,
+        "isSIC": false
+    },
+    "OR": {
+        "obj": "44",
+        "format": 3,
+        "isSIC": true
+    },
+    "RD": {
+        "obj": "D8",
+        "format": 3,
+        "isSIC": true
+    },
+    "RMO": {
+        "obj": "AC",
+        "format": 2,
+        "isSIC": false
+    },
+    "RSUB": {
+        "obj": "4C",
+        "format": 3,
+        "isSIC": true
+    },
+    "SHIFTL": {
+        "obj": "A4",
+        "format": 2,
+        "isSIC": false
+    },
+    "SHIFTR": {
+        "obj": "A8",
+        "format": 2,
+        "isSIC": false
+    },
+    "SIO": {
+        "obj": "F0",
+        "format": 1,
+        "isSIC": false
+    },
+    "SSK": {
+        "obj": "EC",
+        "format": 3,
+        "isSIC": false
+    },
+    "STA": {
+        "obj": "0C",
+        "format": 3,
+        "isSIC": true
+    },
+    "STB": {
+        "obj": "78",
+        "format": 3,
+        "isSIC": false
+    },
+    "STCH": {
+        "obj": "54",
+        "format": 3,
+        "isSIC": true
+    },
+    "STF": {
+        "obj": "80",
+        "format": 3,
+        "isSIC": false
+    },
+    "STI": {
+        "obj": "D4",
+        "format": 3,
+        "isSIC": false
+    },
+    "STL": {
+        "obj": "14",
+        "format": 3,
+        "isSIC": true
+    },
+    "STS": {
+        "obj": "7C",
+        "format": 3,
+        "isSIC": false
+    },
+    "STSW": {
+        "obj": "E8",
+        "format": 3,
+        "isSIC": false
+    },
+    "STT": {
+        "obj": "84",
+        "format": 3,
+        "isSIC": false
+    },
+    "STX": {
+        "obj": "10",
+        "format": 3,
+        "isSIC": true
+    },
+    "SUB": {
+        "obj": "1C",
+        "format": 3,
+        "isSIC": true
+    },
+    "SUBF": {
+        "obj": "5C",
+        "format": 3,
+        "isSIC": false
+    },
+    "SUBR": {
+        "obj": "94",
+        "format": 2,
+        "isSIC": false
+    },
+    "SVC": {
+        "obj": "B0",
+        "format": 2,
+        "isSIC": false
+    },
+    "TD": {
+        "obj": "E0",
+        "format": 3,
+        "isSIC": true
+    },
+    "TIO": {
+        "obj": "F8",
+        "format": 1,
+        "isSIC": false
+    },
+    "TIX": {
+        "obj": "2C",
+        "format": 3,
+        "isSIC": true
+    },
+    "TIXR": {
+        "obj": "B8",
+        "format": 2,
+        "isSIC": false
+    },
+    "WD": {
+        "obj": "DC",
+        "format": 3,
+        "isSIC": true
+    }
+}
