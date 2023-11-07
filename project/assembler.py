@@ -6,15 +6,6 @@ register_table = json.load(open("table/register.json", "r"))
 
 
 class Instruction:
-    def __init__(self) -> None:
-        # 0:directive, 1:format1, 2:format2, 3:format3 4:format4
-        self.format = None
-        self.symbol = ""
-        self.mnemonic = ""
-        self.operand = ""
-        self.location = None
-        self.object_code = ""
-
     def __init__(self, format: int, symbol: str, mnemonic: str, operand: str) -> None:
         self.format = format
         self.symbol = symbol
@@ -32,7 +23,7 @@ class Section:
         self.instructions = []
         self.__extdef_table = {}
         self.__extref_table = {}
-        self.__modified_record = {}
+        self.__modified_record = []
         self.__symbol_table = {}
 
     def __str__(self) -> str:
@@ -61,7 +52,7 @@ class Section:
             print("\t", insruction)
         return ""
 
-    def _calcualte(self, operand: str, cur_location: int = 0) -> str:
+    def _calculate(self, operand: str, cur_location: int) -> str:
         if operand == "*":
             operand = str(cur_location)
             return operand
@@ -77,7 +68,7 @@ class Section:
         except:
             return None
 
-    def sorting(self) -> None:
+    def sorting_block(self) -> None:
         defalut_block = ""
         blocks = {}
         cur_block = None
@@ -127,17 +118,16 @@ class Section:
                     literal_count += 1
             if instruction.mnemonic == "LTORG" or instruction.mnemonic == "END":
                 for literal in literal_table:
-                    literal_instrcution = Instruction(
+                    literal_instercution = Instruction(
                         0, literal["name"], "BYTE", literal["data"]
                     )
 
-                    self.instructions.insert(index, literal_instrcution)
+                    self.instructions.insert(index, literal_instercution)
                 literal_table = []
 
     def set_symbol(self) -> None:
         for instruction in self.instructions:
             if instruction.symbol != "":
-                print(instruction.symbol)
                 self.__symbol_table[instruction.symbol] = None
             if instruction.mnemonic == "EXTDEF":
                 for symbol in instruction.operand.split(","):
@@ -182,26 +172,28 @@ class Section:
                     elif instruction.operand[0] == "X":
                         cur_location += (len(instruction.operand) - 3) // 2
                 elif instruction.mnemonic == "WORD":
-                    result = self._calcualte(instruction.operand, cur_location)
+                    result = self._calculate(instruction.operand, cur_location)
                     if result != None:
                         self.__symbol_table[instruction.symbol] = result
                     cur_location += 3
                 elif instruction.mnemonic == "EQU":
-                    result = self._calcualte(instruction.operand, cur_location)
+                    result = self._calculate(instruction.operand, cur_location)
                     if result != None:
                         self.__symbol_table[instruction.symbol] = result
                 elif instruction.mnemonic == "ORG":
-                    result = self._calcualte(instruction.operand, cur_location)
+                    result = self._calculate(instruction.operand, cur_location)
                     if result != None:
                         instruction.operand = result
                         cur_location = int(result)
                     else:
                         raise Exception("ORG can't support forward reference")
                 elif instruction.mnemonic == "BASE":
-                    result = self._calcualte(instruction.operand, cur_location)
+                    result = self._calculate(instruction.operand, cur_location)
                     if result != None:
                         instruction.operand = result
-
+                elif instruction.mnemonic == "RSUB":
+                    instruction.operand = "#0"
+                    cur_location += 3
                 else:
                     cur_location += int(instruction.format)
 
@@ -224,34 +216,202 @@ class Section:
             elif instruction.mnemonic == "WORD":
                 cur_location += 3
             elif instruction.mnemonic == "ORG":
-                result = self._calcualte(instruction.operand)
+                result = self._calculate(instruction.operand, cur_location)
                 cur_location = int(result)
 
-    def set_object_code(self) -> None:
+    def set_reference_location(self) -> None:
+        for symbol in self.__extref_table:
+            self.__extref_table[symbol] = self.__symbol_table[symbol]
+
+    def sorting_location(self) -> None:
+        self.instructions.sort(key=lambda x: x.location)
+
+    def generate_object_code(self) -> None:
         base = 0
         for instruction in self.instructions:
             if instruction.mnemonic == "BYTE":
                 if instruction.operand[0] == "C":
-                    instruction.object_code = f"{instruction.operand[2:-1]}"
+                    for char in instruction.operand[2:-1]:
+                        instruction.object_code += f"{ord(char):02X}"
                 elif instruction.operand[0] == "X":
-                    instruction.object_code = f"{instruction.operand[2:-1]}"
+                    instruction.object_code = instruction.operand[2:-1]
             elif instruction.mnemonic == "WORD":
                 instruction.object_code = f"{int(instruction.operand):06X}"
             elif instruction.mnemonic == "BASE":
-                base = self._calcualte(instruction.operand)
-
+                base = self._calculate(instruction.operand, instruction.location)
             elif instruction.mnemonic in opcode_table:
-                pass
+                if instruction.format == 1:
+                    instruction.object_code = (
+                        f"{opcode_table[instruction.mnemonic]['obj']}"
+                    )
+                elif instruction.format == 2:
+                    register1 = register_table[instruction.operand.split(",")[0]]
+                    register2 = register_table[
+                        (
+                            instruction.operand.split(",")[1]
+                            if len(instruction.operand.split(",")) > 1
+                            else "A"
+                        )
+                    ]
+                    instruction.object_code = f"{opcode_table[instruction.mnemonic]['obj']}{register1}{register2}"
+                elif instruction.format == 3:
+                    opcode = int(opcode_table[instruction.mnemonic]["obj"], 16) >> 2
+                    n, i, x, b, p, e = 0, 0, 0, 0, 0, 0
+                    disp = 0
+                    if "," in instruction.operand:
+                        x = 1
+                        instruction.operand = instruction.operand[:-2]
+                    if instruction.operand[0] == "#":
+                        n, i, b, p = 0, 1, 0, 0
+                        disp = int(
+                            self._calculate(
+                                instruction.operand[1:], instruction.location
+                            )
+                        )
+                        code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>012b}"
+                        instruction.object_code = f"{int(code,2):>06X}"
+                    elif instruction.operand[0] == "@":
+                        n, i = 1, 0
+                        TA = int(
+                            self._calculate(
+                                instruction.operand[1:], instruction.location
+                            )
+                        )
+                        if -(2**11) <= TA - instruction.location <= 2**11 - 1:
+                            b, p = 1, 0
+                            disp = TA - instruction.location
+                            if disp < 0:
+                                disp = 2**12 + disp
+                            code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>012b}"
+                            instruction.object_code = f"{int(code,2):>06X}"
+                        elif 0 <= TA - base <= 2**12 - 1:
+                            b, p = 0, 1
+                            disp = TA - base
+                            code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>012b}"
+                            instruction.object_code = f"{int(code,2):>06X}"
+                        else:
+                            raise Exception("Need format 4")
+                    else:
+                        n, i = 1, 1
+                        TA = int(
+                            self._calculate(instruction.operand, instruction.location)
+                        )
+                        if -(2**11) <= TA - instruction.location <= 2**11 - 1:
+                            b, p = 1, 0
+                            disp = TA - instruction.location
+                            if disp < 0:
+                                disp = 2**12 + disp
+                            code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>012b}"
+                            instruction.object_code = f"{int(code,2):>06X}"
+                        elif 0 <= TA - base <= 2**12 - 1:
+                            b, p = 0, 1
+                            disp = TA - base
+                            code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>012b}"
+                            instruction.object_code = f"{int(code,2):>06X}"
+                        else:
+                            raise Exception("Need format 4")
+                elif instruction.format == 4:
+                    opcode = int(opcode_table[instruction.mnemonic]["obj"], 16) >> 2
+                    n, i, x, b, p, e = 0, 0, 0, 0, 0, 1
+                    disp = 0
+                    if "," in instruction.operand:
+                        x = 1
+                        instruction.operand = instruction.operand[:-2]
+                    if instruction.operand[0] == "#":
+                        n, i, b, p = 0, 1, 0, 0
+                        disp = int(
+                            self._calculate(
+                                instruction.operand[1:], instruction.location
+                            )
+                        )
+                        code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>020b}"
+                        instruction.object_code = f"{int(code,2):>08X}"
+                    elif instruction.operand[0] == "@":
+                        n, i, b, p = 1, 0, 0, 0
+                        disp = int(
+                            self._calculate(instruction.operand, instruction.location)
+                        )
+                        code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>020b}"
+                        instruction.object_code = f"{int(code,2):>08X}"
+                    else:
+                        n, i, b, p = 1, 1, 0, 0
+                        disp = int(
+                            self._calculate(instruction.operand, instruction.location)
+                        )
+                        code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>020b}"
+                        instruction.object_code = f"{int(code,2):>08X}"
 
     def assemble(self) -> None:
-        self.sorting()
+        self.sorting_block()
         self.slove_literal()
         self.set_symbol()
         self.set_location()
-        self.set_object_code()
+        self.set_reference_location()
+        self.sorting_location()
+        self.generate_object_code()
 
     def write(self, file) -> None:
-        pass
+        # write header
+        file.write("H")
+        file.write(self.instructions[0].symbol.ljust(6))
+        file.write(f"{self.instructions[0].location:06X}")
+        file.write(
+            f"{self.instructions[-1].location - self.instructions[0].location:06X}"
+        )
+        file.write("\n")
+
+        # write extdef
+        size = 0
+        for symbol in self.__extdef_table:
+            if size == 0:
+                file.write("D")
+            file.write("D")
+            file.write(symbol.ljust(6))
+            file.write(f"{self.__extdef_table[symbol]:06X}")
+            size += 1
+            if size == 5:
+                file.write("\n")
+                size = 0
+        if self.__extdef_table != {}:
+            file.write("\n")
+
+        # write extref
+        size = 0
+        for symbol in self.__extref_table:
+            if size == 0:
+                file.write("R")
+            file.write("R")
+            file.write(symbol.ljust(6))
+            size += 1
+            if size == 5:
+                file.write("\n")
+                size = 0
+        if self.__extref_table != {}:
+            file.write("\n")
+
+        size = 0
+        for instruction in self.instructions:
+            if instruction.mnemonic == "RESW" or instruction.mnemonic == "RESB":
+                if size != 0:
+                    file.write("\n")
+                size = 0
+                continue
+            if instruction.object_code != "":
+                if size == 0:
+                    file.write("T")
+                    file.write(f"{instruction.location:06X}")
+                if size + len(instruction.object_code) > 60:
+                    file.write("\n")
+                    file.write("T")
+                    file.write(f"{instruction.location:06X}")
+                    size = 0
+                file.write(instruction.object_code)
+                size += len(instruction.object_code)
+        file.write("\n")
+
+        # write end
+        file.write("E")
+        file.write(f"{self.instructions[0].location:06X}")
 
 
 class Assembler:
