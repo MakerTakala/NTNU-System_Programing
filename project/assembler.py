@@ -239,6 +239,8 @@ class Section:
                 instruction.object_code = f"{int(instruction.operand):06X}"
             elif instruction.mnemonic == "BASE":
                 base = self._calculate(instruction.operand, instruction.location)
+            elif instruction.mnemonic == "RSUB":
+                instruction.object_code = "4F0000"
             elif instruction.mnemonic in opcode_table:
                 if instruction.format == 1:
                     instruction.object_code = (
@@ -262,14 +264,41 @@ class Section:
                         x = 1
                         instruction.operand = instruction.operand[:-2]
                     if instruction.operand[0] == "#":
-                        n, i, b, p = 0, 1, 0, 0
-                        disp = int(
-                            self._calculate(
-                                instruction.operand[1:], instruction.location
+                        if instruction.operand[1:].isdigit():
+                            n, i, b, p = 0, 1, 0, 0
+                            disp = int(
+                                self._calculate(
+                                    instruction.operand[1:], instruction.location
+                                )
                             )
-                        )
-                        code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>012b}"
-                        instruction.object_code = f"{int(code,2):>06X}"
+                            code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>012b}"
+                            instruction.object_code = f"{int(code,2):>06X}"
+                        else:
+                            n, i = 0, 1
+                            TA = int(
+                                self._calculate(
+                                    instruction.operand[1:], instruction.location
+                                )
+                            )
+                            if (
+                                -(2**11)
+                                <= TA - (instruction.location + instruction.format)
+                                <= 2**11 - 1
+                            ):
+                                b, p = 0, 1
+                                disp = TA - (instruction.location + instruction.format)
+                                if disp < 0:
+                                    disp = 2**12 + disp
+                                code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>012b}"
+                                instruction.object_code = f"{int(code,2):>06X}"
+                            elif 0 <= TA - base <= 2**12 - 1:
+                                b, p = 1, 0
+                                disp = TA - base
+                                code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>012b}"
+                                instruction.object_code = f"{int(code,2):>06X}"
+                            else:
+                                raise Exception("Need format 4")
+
                     elif instruction.operand[0] == "@":
                         n, i = 1, 0
                         TA = int(
@@ -277,15 +306,20 @@ class Section:
                                 instruction.operand[1:], instruction.location
                             )
                         )
-                        if -(2**11) <= TA - instruction.location <= 2**11 - 1:
-                            b, p = 1, 0
-                            disp = TA - instruction.location
+
+                        if (
+                            -(2**11)
+                            <= TA - (instruction.location + instruction.format)
+                            <= 2**11 - 1
+                        ):
+                            b, p = 0, 1
+                            disp = TA - (instruction.location + instruction.format)
                             if disp < 0:
                                 disp = 2**12 + disp
                             code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>012b}"
                             instruction.object_code = f"{int(code,2):>06X}"
                         elif 0 <= TA - base <= 2**12 - 1:
-                            b, p = 0, 1
+                            b, p = 1, 0
                             disp = TA - base
                             code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>012b}"
                             instruction.object_code = f"{int(code,2):>06X}"
@@ -296,15 +330,19 @@ class Section:
                         TA = int(
                             self._calculate(instruction.operand, instruction.location)
                         )
-                        if -(2**11) <= TA - instruction.location <= 2**11 - 1:
-                            b, p = 1, 0
-                            disp = TA - instruction.location
+                        if (
+                            -(2**11)
+                            <= TA - (instruction.location + instruction.format)
+                            <= 2**11 - 1
+                        ):
+                            b, p = 0, 1
+                            disp = TA - (instruction.location + instruction.format)
                             if disp < 0:
                                 disp = 2**12 + disp
                             code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>012b}"
                             instruction.object_code = f"{int(code,2):>06X}"
                         elif 0 <= TA - base <= 2**12 - 1:
-                            b, p = 0, 1
+                            b, p = 1, 0
                             disp = TA - base
                             code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>012b}"
                             instruction.object_code = f"{int(code,2):>06X}"
@@ -389,25 +427,35 @@ class Section:
         if self.__extref_table != {}:
             file.write("\n")
 
-        size = 0
+        cur_start = ""
+        cur_text = ""
         for instruction in self.instructions:
             if instruction.mnemonic == "RESW" or instruction.mnemonic == "RESB":
-                if size != 0:
+                if cur_text != "":
+                    file.write("T")
+                    file.write(f"{cur_start:06X}")
+                    file.write(f"{len(cur_text)//2:02X}")
+                    file.write(cur_text)
                     file.write("\n")
-                size = 0
+                    cur_text = ""
                 continue
-            if instruction.object_code != "":
-                if size == 0:
-                    file.write("T")
-                    file.write(f"{instruction.location:06X}")
-                if size + len(instruction.object_code) > 60:
-                    file.write("\n")
-                    file.write("T")
-                    file.write(f"{instruction.location:06X}")
-                    size = 0
-                file.write(instruction.object_code)
-                size += len(instruction.object_code)
-        file.write("\n")
+            if cur_text == "":
+                cur_start = instruction.location
+            if len(cur_text) + len(instruction.object_code) > 60:
+                file.write("T")
+                file.write(f"{cur_start:06X}")
+                file.write(f"{len(cur_text)//2:02X}")
+                file.write(cur_text)
+                file.write("\n")
+                cur_text = ""
+                cur_start = instruction.location
+            cur_text += instruction.object_code
+        if cur_text != "":
+            file.write("T")
+            file.write(f"{cur_start:06X}")
+            file.write(f"{len(cur_text)//2:02X}")
+            file.write(cur_text)
+            file.write("\n")
 
         # write end
         file.write("E")
