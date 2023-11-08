@@ -10,7 +10,7 @@ if __name__ == "__main__":
     output_path = "output.txt"
     parser = argparse.ArgumentParser()
     parser.add_argument("inputfile", type=str, help="input file path")
-    parser.add_argument("-o", type=str, help="output file path")
+    parser.add_argument("-o:", type=str, help="output file path")
 
     args = parser.parse_args()
     if args.inputfile == "":
