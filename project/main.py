@@ -7,10 +7,10 @@ if __name__ == "__main__":
     asm = Assembler()
 
     input_path = ""
-    output_path = "output.txt"
+    output_path = ""
     parser = argparse.ArgumentParser()
     parser.add_argument("inputfile", type=str, help="input file path")
-    parser.add_argument("-o:", type=str, help="output file path")
+    parser.add_argument("-o", type=str, help="output file path", default="output.txt")
 
     args = parser.parse_args()
     if args.inputfile == "":
@@ -18,8 +18,8 @@ if __name__ == "__main__":
         exit(1)
 
     input_path = args.inputfile
-    if args.o != "":
-        output_path = args.o
+
+    output_path = args.o
 
     # run assembler
     asm.parser(input_path, output_path)
