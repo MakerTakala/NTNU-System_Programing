@@ -1,4 +1,5 @@
 import json
+import re
 
 opcode_table = json.load(open("table/opcode.json", "r"))
 directive_table = json.load(open("table/directive.json", "r"))
@@ -16,6 +17,19 @@ class Instruction:
 
     def __str__(self) -> str:
         return f"({self.format}, {self.symbol}, {self.mnemonic}, {self.operand}, {self.location}, {self.object_code})"
+
+
+class Modification_record:
+    def __init__(
+        self, location: int, length: int, sign: str = "", reference: str = ""
+    ) -> None:
+        self.location = location
+        self.length = length
+        self.sign = sign
+        self.reference = reference
+
+    def __str__(self) -> str:
+        return f"({self.location}, {self.length}, {self.sign}, {self.reference})"
 
 
 class Section:
@@ -43,9 +57,8 @@ class Section:
         print("}\n")
         # print each modified record
         print("Modified{")
-        for m in self.__modified_record:
-            print("\t", m, self.__modified_record[m])
-        print("}\n")
+        for record in self.__modified_record:
+            print("\t", record)
         # print instruction
         print("Instructions:")
         for insruction in self.instructions:
@@ -62,6 +75,14 @@ class Section:
         for symbol in self.__extdef_table:
             if symbol in operand and self.__extdef_table[symbol] != None:
                 operand = operand.replace(symbol, str(self.__extdef_table[symbol]))
+                for m in re.finditer(symbol, operand):
+                    if m.start() - 1 >= 0:
+                        sign = "+" if operand[m.start() - 1] == "+" else "-"
+                    else:
+                        sign = "+"
+                    self.__modified_record.append(
+                        Modification_record(cur_location, 6, sign, symbol)
+                    )
         try:
             result = eval(operand)
             return result
@@ -121,7 +142,6 @@ class Section:
                     literal_instercution = Instruction(
                         0, literal["name"], "BYTE", literal["data"]
                     )
-
                     self.instructions.insert(index, literal_instercution)
                 literal_table = []
 
@@ -364,17 +384,13 @@ class Section:
                         )
                         code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>020b}"
                         instruction.object_code = f"{int(code,2):>08X}"
-                    elif instruction.operand[0] == "@":
-                        n, i, b, p = 1, 0, 0, 0
-                        disp = int(
-                            self._calculate(instruction.operand, instruction.location)
-                        )
-                        code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>020b}"
-                        instruction.object_code = f"{int(code,2):>08X}"
                     else:
                         n, i, b, p = 1, 1, 0, 0
                         disp = int(
                             self._calculate(instruction.operand, instruction.location)
+                        )
+                        self.__modified_record.append(
+                            Modification_record(instruction.location + 1, 5)
                         )
                         code = f"{opcode:>06b}{n}{i}{x}{b}{p}{e}{disp:>020b}"
                         instruction.object_code = f"{int(code,2):>08X}"
@@ -455,6 +471,15 @@ class Section:
             file.write(f"{cur_start:06X}")
             file.write(f"{len(cur_text)//2:02X}")
             file.write(cur_text)
+            file.write("\n")
+
+        # write modified record
+        for record in self.__modified_record:
+            file.write("M")
+            file.write(f"{record.location:06X}")
+            file.write(f"{record.length:02X}")
+            file.write(record.sign)
+            file.write(record.reference)
             file.write("\n")
 
         # write end
