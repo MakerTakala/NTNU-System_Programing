@@ -1,0 +1,21 @@
+Script started on Thu Nov 30 21:56:25 2023
+
+(base) takala@TakaladeMacBook-Pro HW6 %./main
+
+^C21:56 up 12 days, 22:13, 2 users, load averages: 2.24 2.45 2.79
+^C21:56 up 12 days, 22:13, 2 users, load averages: 2.24 2.45 2.79
+21:56 up 12 days, 22:13, 2 users, load averages: 2.22 2.45 2.78
+^C21:56 up 12 days, 22:13, 2 users, load averages: 2.22 2.45 2.78
+^C21:56 up 12 days, 22:13, 2 users, load averages: 2.12 2.42 2.77
+^C21:56 up 12 days, 22:13, 2 users, load averages: 2.12 2.42 2.77
+21:56 up 12 days, 22:13, 2 users, load averages: 2.27 2.45 2.78
+21:57 up 12 days, 22:13, 2 users, load averages: 2.37 2.47 2.78
+^Z
+zsh: suspended ./main
+
+(base) takala@TakaladeMacBook-Pro HW6 %kill %1
+
+[1] + terminated ./main
+(base) takala@TakaladeMacBook-Pro HW6 % exit
+
+Script done on Thu Nov 30 21:57:09 2023

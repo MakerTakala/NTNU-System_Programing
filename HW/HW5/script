@@ -1,0 +1,20 @@
+Script started on Thu Nov 23 15:36:14 2023                                                                                                                                                  
+ 
+
+(base) takala@TakaladeMacBook-Pro HW5 % cat foo.bar
+
+A BC DEF
+ 
+
+(base) takala@TakaladeMacBook-Pro HW5 % ./main                                                                                                                                                 
+ 
+
+(base) takala@TakaladeMacBook-Pro HW5 % cat result
+
+(A) (BC) (DEF)                                                                                                                                      
+ 
+
+(base) takala@TakaladeMacBook-Pro HW5 % exit
+
+
+Script done on Thu Nov 23 15:36:35 2023
