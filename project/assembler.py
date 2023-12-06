@@ -109,7 +109,7 @@ class Section:
         except:
             return None
 
-    def slove_literal(self) -> None:
+    def solve_literal(self) -> None:
         literal_table = []
         literal_count = 1
         literal_set = {}
@@ -483,7 +483,7 @@ class Section:
                         )
 
     def assemble(self) -> None:
-        self.slove_literal()
+        self.solve_literal()
         self.sorting_block()
         self.set_symbol()
         self.set_location()
