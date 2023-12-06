@@ -3,7 +3,8 @@
 ## Architecture
 
 **main.py**: Solve the argument input
-**class-Assembler**: Slove preproscessing data and split control section
+
+**class-Assembler**: Slove preproscessing data, split control section and IO control
 
 **class-Section**:
 Solve all instrucitons and change instructions to obj code
