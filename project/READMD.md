@@ -18,7 +18,8 @@ Testing Environment: macOS M1
 
 `python3 main.py [-h] [-o O] inputfile`
 
-e.g. `python3 main.py input -o my_output.txt`
+e.g. `python3 main.py input -o my_output`
+output: my_output-1
 
 #### positional arguments:
 

@@ -2,12 +2,17 @@
 
 ## Architecture
 
-**main.py**: Solve the argument input
+**main.py**: Solve the argument input and output
+
+This is the program entry point, it will be responsbility to slove argument input and output path and file. You also can use -h argument to show the help.
 
 **class-Assembler**: Slove preproscessing data, split control section and IO control
 
-**class-Section**:
-Solve all instrucitons and change instructions to obj code
+A class in assembler.py, it will split the control section to Section class, and control all section processing such as assmebler and write. Besides, it will processing the input file and make the text to Instruciton class and push to section.
+
+**class-Section**: Solve all instrucitons and change instructions to obj code
+
+A class in assembler.py, it will process the instruction to object code, it will do following work flow.
 
 -   solve_literal
 -   sorting_block
@@ -17,11 +22,11 @@ Solve all instrucitons and change instructions to obj code
 -   sorting_index
 -   generate_object_code
 
-**class-Modification_record**:
-Store modification record
+The result object will be save at Instruction class.
 
-**class-Instruction**:
-Store each instruciton
+**class-Modification_record**: Store modification record
+
+**class-Instruction**: Store each instruciton
 
 ## Learned and Experienced
 
@@ -35,6 +40,28 @@ Literals
 Symbol-defining Statements  
 Program Blocks  
 Control Sections
+
+## Information
+
+Lang: python  
+Version: 3.9.6  
+Testing Environment: macOS M1
+
+## Usage:
+
+`python3 main.py [-h] [-o O] inputfile`
+
+e.g. `python3 main.py input -o my_output`
+output: myoutput-1
+
+#### positional arguments:
+
+inputfile: input file path
+
+#### options:
+
+-h, --help show this help message and exit  
+-o O output file path
 
 ## Copyright Claim
 

@@ -651,8 +651,8 @@ class Assembler:
             print(section)
 
     def write_file(self, path: str) -> None:
-        with open(path, "w") as f:
-            for section in self.__sections:
+        for index, section in enumerate(self.__sections):
+            with open(path + "-" + str(index + 1) + ".txt", "w") as f:
                 section.write(f)
 
     def parser(self, input_path: str, output_path: str) -> None:
