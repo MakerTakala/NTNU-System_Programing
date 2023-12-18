@@ -2,36 +2,54 @@
 
 ## Architecture
 
+I write two file: main.py and Assembler.py
+
 **main.py**: Solve the argument input and output
 
 This is the program entry point, it will be responsbility to slove argument input and output path and file. You also can use -h argument to show the help.
 
-**class-Assembler**: Slove preproscessing data, split control section and IO control
+**Assembler.py**: Defind all class in this file
 
-A class in assembler.py, it will split the control section to Section class, and control all section processing such as assmebler and write. Besides, it will processing the input file and make the text to Instruciton class and push to section.
+This is define all class in this file, If anyone want to expending this assembler, he could use this file to expending.
 
-**class-Section**: Solve all instrucitons and change instructions to obj code
+**Class**: I also define lot of class with good architecture
 
-A class in assembler.py, it will process the instruction to object code, it will do following work flow.
+-   **class-Assembler**: Slove preproscessing data, split control section and IO control
 
--   solve_literal
--   sorting_block
--   set_symbol
--   set_location
--   set_exdef_location
--   sorting_index
--   generate_object_code
+> A class in assembler.py, it will split the control section to Section class, and control all section processing such as assmebler and write. Besides, it will processing the input file and make the text to Instruciton class and push to section.
 
-The result object will be save at Instruction class.
+-   **class-Section**: Solve all instrucitons and change instructions to obj code
 
-**class-Modification_record**: Store modification record
+> A class in assembler.py, it will process the instruction to object code, it will do following work flow.
 
-**class-Instruction**: Store each instruciton
+    -   solve_literal: Replace all literal to a symbol
+    -   sorting_block: Sorting program block with same block to a group
+    -   set_symbol: set all symbol to correct location
+    -   set_location: set all instruction location
+    -   set_exdef_location: set the exdef location
+    -   sorting_index: Sorting the instuction to original position
+    -   generate_object_code: Generate object code
+
+> The result object will be save at Instruction class.
+
+-   **class-Modification_record**: Store modification record
+
+-   **class-Instruction**: Store each instruciton
 
 ## Learned and Experienced
 
-Great architecture can help you write great code.
-Remember to commit the code.
+Great architecture can help you write great code: At the first time, my architecture is messy, I hardly to debug. So I rebuild all project with great architecture and help me easy to debug.
+
+Remember to commit the code: I have write a bad code result in my thought totally confusion. So I decide to rewrite that part. However, I forgot to commit my code record and I can't revert to code version to previous. I tell me git is a good tool to help you.
+
+Deilemma:
+
+-   How to slove forward reference:
+    -   In final, I give up to use one-pass assmebler, and deside to use multi-pass assmebler.
+-   How to fulfill Arithmetic in programing:
+    -   I use an package to fulfill it.
+-   How to control program block and set them to correct place.
+    -   store an index in instruction calss and use it to resorting.
 
 ## More than the Required
 

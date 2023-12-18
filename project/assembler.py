@@ -222,10 +222,20 @@ class Section:
                     self.__symbol_table[instruction.symbol] = 0
                 elif instruction.mnemonic == "RESW":
                     self.__symbol_table[instruction.symbol] = cur_location
-                    cur_location += 3 * int(instruction.operand)
+                    result = self._calculate(
+                        instruction.operand, cur_location, instruction.mnemonic
+                    )
+                    if result == None:
+                        continue
+                    cur_location += 3 * int(result)
                 elif instruction.mnemonic == "RESB":
                     self.__symbol_table[instruction.symbol] = cur_location
-                    cur_location += int(instruction.operand)
+                    result = self._calculate(
+                        instruction.operand, cur_location, instruction.mnemonic
+                    )
+                    if result == None:
+                        continue
+                    cur_location += int(result)
                 elif instruction.mnemonic == "BYTE":
                     self.__symbol_table[instruction.symbol] = cur_location
                     if instruction.operand[0] == "C":
@@ -278,9 +288,15 @@ class Section:
                 instruction.location = 0
                 cur_location = 0
             elif instruction.mnemonic == "RESW":
-                cur_location += 3 * int(instruction.operand)
+                result = self._calculate(
+                    instruction.operand, cur_location, instruction.mnemonic
+                )
+                cur_location += 3 * int(result)
             elif instruction.mnemonic == "RESB":
-                cur_location += int(instruction.operand)
+                result = self._calculate(
+                    instruction.operand, cur_location, instruction.mnemonic
+                )
+                cur_location += int(result)
             elif instruction.mnemonic == "BYTE":
                 if instruction.operand[0] == "C":
                     cur_location += len(instruction.operand) - 3
