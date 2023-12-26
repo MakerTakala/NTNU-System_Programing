@@ -40,24 +40,26 @@ This is define all class in this file, If anyone want to expending this assemble
 
 Great architecture can help you write great code: At the first time, my architecture is messy, I hardly to debug. So I rebuild all project with great architecture and help me easy to debug.
 
-Remember to commit the code: I have write a bad code result in my thought totally confusion. So I decide to rewrite that part. However, I forgot to commit my code record and I can't revert to code version to previous. I tell me git is a good tool to help you.
+Remember to commit the code: I have write a bad code result in my thought totally confusion. So I decide to rewrite that part. However, I forgot to commit my code record and I can't revert to code version to previous. It tells me git is a good tool to help you.
 
 Deilemma:
 
 -   How to slove forward reference:
-    -   In final, I give up to use one-pass assmebler, and deside to use multi-pass assmebler.
+    -   I use multi loop until all symbol are reslove, ensure all symbol can be set a location.
 -   How to fulfill Arithmetic in programing:
-    -   I use an package to fulfill it.
+    -   I use an package which can read arithmetic. I replace all symbol which knows location, and use package to calculate.
 -   How to control program block and set them to correct place.
-    -   store an index in instruction calss and use it to resorting.
+    -   In each instuction original location, I store an index in instruction calss and use it to resorting after program block change their position to ensure the instuctions location are correct.
 
 ## More than the Required
 
-Basic requirement  
+Basic requirement
 Literals  
 Symbol-defining Statements  
 Program Blocks  
 Control Sections
+
+To prove work, we can see example code `./example/code3.asm` and get result with `code_output-1.txt` `code_output-2.txt` `code_output-3.txt`
 
 ## Information
 
@@ -104,3 +106,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Any thing you would like to let G.H.Hwang know
+
+I really like latter half semester teaching with actual operation, and see what happen in computer. It really help for operation with our lab server when I make junior project. Thanks for teacher theaching this semester.
